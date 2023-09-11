@@ -7,10 +7,10 @@ namespace png_screens
 {
     public partial class Form1 : Form
     {
-        public static void GenerateDateImage(string dateString, string outputPath)
+        public static void GenerateDateImage(string dateString, string timeString, string outputPath)
         {
             // Set the desired font name
-            string fontName = "Segoe UI";
+            string fontName = "Segoe UI Semilight";
             // Get the system's default font and size for the date display
             //Font systemFont = SystemFonts.SmallCaptionFont;
             //float systemFontSize = systemFont.Size;
@@ -27,45 +27,34 @@ namespace png_screens
                 using (Graphics graphics = Graphics.FromImage(bitmap))
                 {
                     // Set the background color
-                    graphics.Clear(Color.Black);
+                    graphics.Clear(Color.Transparent);
 
                     // Set the font and text color
                     Font font = new Font(fontName, fontSize, FontStyle.Regular);
-                    graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                    graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
+                    //graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-                    int paddingRight = 15;  // Pixel value for right padding
-                    int paddingBottom = 0;
+                    int paddingRight = 44;  // Pixel value for right padding
+                    int paddingBottom = -10;
 
                     SizeF stringSize = graphics.MeasureString(dateString, font);
-                    float x = imageWidth - stringSize.Width - paddingRight -10;
-                    float y = imageHeight - stringSize.Height - paddingBottom -10;
-                    PointF startingPoint = new PointF(x, y);
+                    float x = imageWidth - stringSize.Width - paddingRight - 10;
+                    float y = imageHeight - stringSize.Height - paddingBottom - 10;
+                    PointF startingPoint1 = new PointF(x, y);
+                    PointF startingPoint2 = new PointF(x + 5, y - 10);
 
-                    graphics.DrawString(dateString, font, Brushes.White, startingPoint);
+                    graphics.DrawString(dateString, font, Brushes.White, startingPoint1);
+                    graphics.DrawString(timeString, font, Brushes.White, startingPoint2);
 
                     // Save the image to the specified output path
+                    bitmap.SetResolution(300, 300);
                     bitmap.Save(outputPath, ImageFormat.Png);
                 }
             }
         }
-        public Form1()
+        public static void MergeImages(string imageF, string imageS)
         {
-            InitializeComponent();
-
-            
-
-            // Create a method to generate the image from a date string
-            
-
-
-            // Usage
-            string dateString = "09/06/2023";
-            string outputPath = "date_image.png";
-
-            GenerateDateImage(dateString, outputPath);
-
-            /*// Define the width and height of the images
+            // Define the width and height of the images
             int width = 1920;
             int height = 1080;
 
@@ -79,8 +68,8 @@ namespace png_screens
                 graphics.Clear(Color.Transparent);
 
                 // Load the individual images to be merged
-                Bitmap image1 = new Bitmap("image1.png");
-                Bitmap image2 = new Bitmap("image2.png");
+                Bitmap image1 = new Bitmap(imageF);
+                Bitmap image2 = new Bitmap(imageS);
                 //Bitmap image3 = new Bitmap("image3.png");
 
                 // Set the blending mode to achieve the desired transparency effect
@@ -105,7 +94,29 @@ namespace png_screens
 
             // Dispose the merged image
             mergedImage.Dispose();
-            */
+
+        }
+        public Form1()
+        {
+            InitializeComponent();
+
+
+
+            // Create a method to generate the image from a date string
+
+
+
+            // Usage
+            string dateString = "11/09/2023";
+            string timeString = "14:59";
+            string outputPath = "date_image.png";
+            string imageF = "image1.png";
+            string imageS = "date_image.png";
+
+            GenerateDateImage(dateString, timeString, outputPath);
+            MergeImages(imageF, imageS);
+
+
         }
     }
 }
