@@ -1,7 +1,9 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace png_screens
 {
@@ -31,23 +33,31 @@ namespace png_screens
 
                     // Set the font and text color
                     Font font = new Font(fontName, fontSize, FontStyle.Regular);
-                    //graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                    graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+                    //graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                    //graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
 
-                    int paddingRight = 44;  // Pixel value for right padding
-                    int paddingBottom = -10;
+                    //int paddingRight = 0;  // Pixel value for right padding
+                    //int paddingBottom = 0;
 
-                    SizeF stringSize = graphics.MeasureString(dateString, font);
-                    float x = imageWidth - stringSize.Width - paddingRight - 10;
-                    float y = imageHeight - stringSize.Height - paddingBottom - 10;
+                    //SizeF stringSize = graphics.MeasureString(dateString, font);
+                    //Debug.WriteLine(stringSize);
+                    //float x = imageWidth - stringSize.Width - paddingRight - 10;
+                    //float y = imageHeight - stringSize.Height - paddingBottom - 10;
+                    //Debug.WriteLine(x);
+                    //Debug.WriteLine(y);
+                    
+                    float x = 1819-2;
+                    float y = 1046-4;
                     PointF startingPoint1 = new PointF(x, y);
-                    PointF startingPoint2 = new PointF(x + 5, y - 10);
+                    x = 1803-2;
+                    y = 1064-4;
+                    PointF startingPoint2 = new PointF(x, y);
 
-                    graphics.DrawString(dateString, font, Brushes.White, startingPoint1);
-                    graphics.DrawString(timeString, font, Brushes.White, startingPoint2);
+                    graphics.DrawString(timeString, font, Brushes.White, startingPoint1);
+                    graphics.DrawString(dateString, font, Brushes.White, startingPoint2);
 
                     // Save the image to the specified output path
-                    bitmap.SetResolution(300, 300);
+                    bitmap.SetResolution(96, 96);
                     bitmap.Save(outputPath, ImageFormat.Png);
                 }
             }
@@ -107,8 +117,8 @@ namespace png_screens
 
 
             // Usage
-            string dateString = "11/09/2023";
-            string timeString = "14:59";
+            string dateString = "01/06/2023";
+            string timeString = "13:34";
             string outputPath = "date_image.png";
             string imageF = "image1.png";
             string imageS = "date_image.png";
