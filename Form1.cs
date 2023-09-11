@@ -4,11 +4,13 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace png_screens
 {
     public partial class Form1 : Form
     {
+        public static int i = 1;
         public static void GenerateDateImage(string dateString, string timeString, string outputPath)
         {
             // Set the desired font name
@@ -20,6 +22,7 @@ namespace png_screens
             // Calculate the font size for the desired image height
             int imageWidth = 1920;
             int imageHeight = 1080;
+            
             //float fontSize = Math.Min(imageWidth / (dateString.Length * 0.7f), imageHeight / 2.5f) * (systemFontSize / 16f);
             float fontSize = 9;
 
@@ -97,10 +100,12 @@ namespace png_screens
                 image1.Dispose();
                 image2.Dispose();
                 //image3.Dispose();
+                
             }
 
             // Save the merged image as a new PNG file
-            mergedImage.Save("merged_image.png", ImageFormat.Png);
+            mergedImage.Save($"merge{i}.png", ImageFormat.Png);
+            i++;
 
             // Dispose the merged image
             mergedImage.Dispose();
@@ -115,18 +120,28 @@ namespace png_screens
             // Create a method to generate the image from a date string
 
 
-
+            
             // Usage
-            string dateString = "01/06/2023";
-            string timeString = "13:34";
-            string outputPath = "date_image.png";
-            string imageF = "image1.png";
-            string imageS = "date_image.png";
+            
+            
+        }
 
-            GenerateDateImage(dateString, timeString, outputPath);
-            MergeImages(imageF, imageS);
+        private void startBtn_Click(object sender, EventArgs e)
+        {
+            
+            for (DateTime currentDate = startDate.Value; currentDate <= endDate.Value; currentDate = currentDate.AddDays(1))
+            {
+                
+                string dateString = currentDate.ToShortDateString();
+                string timeString = "13:34";
+                string outputPath = "date_image.png";
+                string imageF = "image1.png";
+                string imageS = "date_image.png";
+                
+                GenerateDateImage(dateString, timeString, outputPath);
+                MergeImages(imageF, imageS);
 
-
+            }
         }
     }
 }
