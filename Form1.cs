@@ -5,12 +5,15 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace png_screens
 {
     public partial class Form1 : Form
     {
         public static int i = 1;
+        private string outputPath;
+        private string sourcePath;
         public static void GenerateDateImage(string dateString, string timeString, string outputPath)
         {
             // Set the desired font name
@@ -61,11 +64,11 @@ namespace png_screens
 
                     // Save the image to the specified output path
                     bitmap.SetResolution(96, 96);
-                    bitmap.Save(outputPath, ImageFormat.Png);
+                    bitmap.Save(Path.Combine(outputPath, "date_image.png"), ImageFormat.Png);
                 }
             }
         }
-        public static void MergeImages(string imageF, string imageS)
+        public static void MergeImages(string imageBase, string imageF, string imageS, string outputPath)
         {
             // Define the width and height of the images
             int width = 1920;
@@ -83,7 +86,7 @@ namespace png_screens
                 // Load the individual images to be merged
                 Bitmap image1 = new Bitmap(imageF);
                 Bitmap image2 = new Bitmap(imageS);
-                //Bitmap image3 = new Bitmap("image3.png");
+                Bitmap image3 = new Bitmap(imageBase);
 
                 // Set the blending mode to achieve the desired transparency effect
                 ColorMatrix colorMatrix = new ColorMatrix();
@@ -92,19 +95,20 @@ namespace png_screens
                 imageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
 
                 // Draw the images onto the merged image with the specified transparency level
+                graphics.DrawImage(image3, new Rectangle(0, 0, width, height), 0, 0, width, height, GraphicsUnit.Pixel, imageAttributes);
                 graphics.DrawImage(image1, new Rectangle(0, 0, width, height), 0, 0, width, height, GraphicsUnit.Pixel, imageAttributes);
                 graphics.DrawImage(image2, new Rectangle(0, 0, width, height), 0, 0, width, height, GraphicsUnit.Pixel, imageAttributes);
-                //graphics.DrawImage(image3, new Rectangle(0, 0, width, height), 0, 0, width, height, GraphicsUnit.Pixel, imageAttributes);
+                
 
                 // Dispose the individual images
                 image1.Dispose();
                 image2.Dispose();
-                //image3.Dispose();
+                image3.Dispose();
                 
             }
 
             // Save the merged image as a new PNG file
-            mergedImage.Save($"merge{i}.png", ImageFormat.Png);
+            mergedImage.Save(Path.Combine(outputPath, $"Final_merge{i}.png"), ImageFormat.Png);
             i++;
 
             // Dispose the merged image
@@ -117,30 +121,75 @@ namespace png_screens
 
 
 
-            // Create a method to generate the image from a date string
-
-
-            
-            // Usage
             
             
         }
 
         private void startBtn_Click(object sender, EventArgs e)
         {
-            
-            for (DateTime currentDate = startDate.Value; currentDate <= endDate.Value; currentDate = currentDate.AddDays(1))
+            int imageIndex = 0;
+            for (DateTime currentDate = startDate.Value.Date; currentDate <= endDate.Value.Date; currentDate = currentDate.AddDays(1))
             {
-                
                 string dateString = currentDate.ToShortDateString();
-                string timeString = "13:34";
-                string outputPath = "date_image.png";
-                string imageF = "image1.png";
-                string imageS = "date_image.png";
-                
-                GenerateDateImage(dateString, timeString, outputPath);
-                MergeImages(imageF, imageS);
+                int interval = 0;
+                Debug.WriteLine(currentDate);
+                for (int counterHour = 1; counterHour <= 12; counterHour++)
+                {
+                    
+                    
+                    DateTime currentHour = currentDate.AddHours((int)startHour.Value).AddMinutes((int)startMinute.Value+interval);
+                    string timeString = currentHour.ToString("HH:mm");
+                    string exportFilePath = Path.Combine(outputPath, "date_image.png");
+                    string imageF = Path.Combine(outputPath, "image1.png");
+                    string imageS = Path.Combine(outputPath, "date_image.png");
+                    string[] imageFiles = Directory.GetFiles(sourcePath, "*.png");
+                    string imageBase = imageFiles[imageIndex];
+                    GenerateDateImage(dateString, timeString, outputPath);
+                    MergeImages(imageBase, imageF, imageS, outputPath);
+                    interval = interval +30;
+                }
+            }
+        }
 
+        private void outDirectory_Click(object sender, EventArgs e)
+        {
+            using (var dialog = new FolderBrowserDialog())
+            {
+                // Set the initial directory for the dialog
+                dialog.SelectedPath = "C:\\";
+
+                // Show the dialog and get the result
+                DialogResult result = dialog.ShowDialog();
+
+
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
+                {
+                    // The user selected a directory
+                    outputPath = dialog.SelectedPath;
+                    //Debug.WriteLine(selectedFolder);
+
+
+                }
+            }
+        }
+
+        private void btnSource_Click(object sender, EventArgs e)
+        {
+            using (var dialog1 = new FolderBrowserDialog())
+            {
+                // Set the initial directory for the dialog
+                dialog1.SelectedPath = "C:\\";
+
+                // Show the dialog and get the result
+                DialogResult result = dialog1.ShowDialog();
+
+
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dialog1.SelectedPath))
+                {
+                    // The user selected a directory
+                    sourcePath = dialog1.SelectedPath;
+                    //Debug.WriteLine(selectedFolder);
+                }
             }
         }
     }
