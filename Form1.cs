@@ -14,7 +14,8 @@ namespace png_screens
         public static int i = 1;
         private string outputPath;
         private string sourcePath;
-        public static void GenerateDateImage(string dateString, string timeString, string outputPath)
+        private string selectedPng;
+        public static Bitmap GenerateDateImage(string dateString, string timeString)
         {
             // Set the desired font name
             string fontName = "Segoe UI Semilight";
@@ -30,8 +31,8 @@ namespace png_screens
             float fontSize = 9;
 
             // Create a Bitmap object with desired width and height
-            using (Bitmap bitmap = new Bitmap(imageWidth, imageHeight))
-            {
+            Bitmap bitmap = new Bitmap(imageWidth, imageHeight);
+            
                 using (Graphics graphics = Graphics.FromImage(bitmap))
                 {
                     // Set the background color
@@ -64,11 +65,11 @@ namespace png_screens
 
                     // Save the image to the specified output path
                     bitmap.SetResolution(96, 96);
-                    bitmap.Save(Path.Combine(outputPath, "date_image.png"), ImageFormat.Png);
+                    //bitmap.Save(Path.Combine(outputPath, "date_image.png"), ImageFormat.Png);
                 }
-            }
+            return bitmap;
         }
-        public static void MergeImages(string imageBase, string imageF, string imageS, string outputPath)
+        public static void MergeImages(string imageBase, string imageMid,Bitmap imageDate, string outputPath)
         {
             // Define the width and height of the images
             int width = 1920;
@@ -84,8 +85,8 @@ namespace png_screens
                 graphics.Clear(Color.Transparent);
 
                 // Load the individual images to be merged
-                Bitmap image1 = new Bitmap(imageF);
-                Bitmap image2 = new Bitmap(imageS);
+                Bitmap image1 = new Bitmap(imageMid);
+                Bitmap image2 = imageDate;
                 Bitmap image3 = new Bitmap(imageBase);
 
                 // Set the blending mode to achieve the desired transparency effect
@@ -128,25 +129,35 @@ namespace png_screens
         private void startBtn_Click(object sender, EventArgs e)
         {
             int imageIndex = 0;
+            //Finding irritations by diving the hours and minutes from startHour with endHour
+            DateTime startingPoint = startDate.Value.AddHours((int)startHour.Value).AddMinutes((int)startMinute.Value);
+            DateTime endingPoint = startDate.Value.AddHours((int)endHour.Value).AddMinutes((int)endMinute.Value);
+            TimeSpan timeDifference = endingPoint - startingPoint;
+
+            // Get the total number of minutes
+            double minutesDifference = timeDifference.TotalMinutes;
+            Debug.WriteLine(minutesDifference);
+            double interval = minutesDifference / ((double)numericIrritations.Value - 1);
             for (DateTime currentDate = startDate.Value.Date; currentDate <= endDate.Value.Date; currentDate = currentDate.AddDays(1))
             {
                 string dateString = currentDate.ToShortDateString();
-                int interval = 0;
+                double spacing = 0;
                 Debug.WriteLine(currentDate);
-                for (int counterHour = 1; counterHour <= 12; counterHour++)
+                
+                
+                for (int counterHour = 1; counterHour <= numericIrritations.Value; counterHour++)
                 {
-                    
-                    
-                    DateTime currentHour = currentDate.AddHours((int)startHour.Value).AddMinutes((int)startMinute.Value+interval);
+
+
+                    DateTime currentHour = currentDate.AddHours((int)startHour.Value).AddMinutes((int)startMinute.Value+spacing);
                     string timeString = currentHour.ToString("HH:mm");
-                    string exportFilePath = Path.Combine(outputPath, "date_image.png");
-                    string imageF = Path.Combine(outputPath, "image1.png");
-                    string imageS = Path.Combine(outputPath, "date_image.png");
+                    string imageMiddle = selectedPng;
                     string[] imageFiles = Directory.GetFiles(sourcePath, "*.png");
                     string imageBase = imageFiles[imageIndex];
-                    GenerateDateImage(dateString, timeString, outputPath);
-                    MergeImages(imageBase, imageF, imageS, outputPath);
-                    interval = interval +30;
+                    Bitmap dateImage = GenerateDateImage(dateString, timeString);
+                    MergeImages(imageBase, imageMiddle, dateImage, outputPath);
+                    spacing = spacing +interval;
+                    imageIndex++;
                 }
             }
         }
@@ -190,6 +201,18 @@ namespace png_screens
                     sourcePath = dialog1.SelectedPath;
                     //Debug.WriteLine(selectedFolder);
                 }
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog pngPicker = new OpenFileDialog();
+            pngPicker.Filter = "PNG files (*.png)|*.png"; // Filter to only show .png files
+
+            if (pngPicker.ShowDialog() == DialogResult.OK)
+            {
+                selectedPng = pngPicker.FileName;
+                Debug.WriteLine(selectedPng);
             }
         }
     }
